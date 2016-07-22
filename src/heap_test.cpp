@@ -2,6 +2,7 @@
 #include <fstream>
 #include <string>
 #include "debug.h"
+#include <stdlib.h>
 
 using namespace std;
 
@@ -11,7 +12,7 @@ class getInputData
     fstream myInputFile;
     string line;
     int myTestArray[MAX_ARRAY_SIZE];
-    int pos1, pos2;
+    int pos1, pos2, noElems;
     const char *myInputFileURL;
     void displayLines()
     {
@@ -28,25 +29,46 @@ class getInputData
     };
     void buildTestArray()
     {
-      pos1 = 0;
+      //reinit the array
+      noElems = 0;
+      for (int x=0; x<MAX_ARRAY_SIZE; x++)
+          myTestArray[x]=0;
       myInputFile.open(myInputFileURL);
       if (myInputFile.is_open())
       {
         getline(myInputFile, line);
-        for (int x=0; x<=MAX_ARRAY_SIZE; x++)
+        pos1 = pos2 = 0;
+        for (int x=0; x<MAX_ARRAY_SIZE; x++)
     	  {
-    	    if (pos1 <= line.length())
+    	    if (pos2 >= 0)
     	    {
     	      pos2 = line.find(" ", pos1);
-    	      //myTestArray[x]=std::stoi(line.substr(pos1, pos2-pos1).c_str());
+    	      myTestArray[x] = std::stoi(line.substr(pos1, pos2-pos1));
     	      cout << myTestArray[x] << '\n';
     	      pos1 = pos2 + 1;
+            noElems ++;
     	    }
     	    else return;
     	  }
         myInputFile.close();
       }
       else cout << '\n' << "unable to open" << '\n';
+    }
+    void sortTestArray()
+    {
+      for (int x=0; x < noElems - 1; x++)
+          for (int y=x+1; y < noElems; y++)
+            if (myTestArray[x] > myTestArray[y])
+            {
+              int buffer = myTestArray[x];
+              myTestArray[x] = myTestArray[y];
+              myTestArray[y] = buffer;
+            }
+    }
+    void printTestArray()
+    {
+      for (int x=0; x < noElems; x++)
+        cout << myTestArray[x] << '\n';
     }
 };
 /****************************************************************************/
@@ -121,6 +143,8 @@ int main()
   myTestData.myInputFileURL = "input.txt";
   myTestData.displayLines();
   myTestData.buildTestArray();
+  myTestData.sortTestArray();
+  myTestData.printTestArray();
   heap myFirstHeap(myTestData.myTestArray);
   myFirstHeap.buildMaxHeap(myTestData.myTestArray);
   return 0;
